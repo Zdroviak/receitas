@@ -22,7 +22,7 @@
   h1{font-size:18px;margin:0 0 10px 0;text-align:center}
 
   /* inputs/buttons */
-  select,textarea,button,input[type=text]{width:100%;padding:12px;font-size:16px;border-radius:8px;border:1px solid var(--btn-border);box-sizing:border-box;background:transparent;color:var(--text)}
+  select,textarea,button,input[type=text],input[type=password]{width:100%;padding:12px;font-size:16px;border-radius:8px;border:1px solid var(--btn-border);box-sizing:border-box;background:transparent;color:var(--text)}
   button{background:var(--btn-bg);color:var(--btn-text);border:1px solid var(--btn-border);cursor:pointer}
   .btn-secondary{background:var(--btn-secondary-bg);}
 
@@ -43,7 +43,7 @@
   footer{margin-top:12px;font-size:13px;color:var(--muted);text-align:center}
   @media(max-width:420px){.container{padding:12px}h1{font-size:16px}.med-item{font-size:15px;padding:8px)}
 
-  /* NOVO ESTILO: TELA DE LOGIN */
+  /* CORREÇÃO ESTILO: TELA DE LOGIN para cobrir a página toda */
   #login-screen {
     position:fixed; top:0; left:0; width:100%; height:100%; 
     background:var(--bg); 
@@ -54,21 +54,33 @@
     align-items:center; 
     color:var(--text);
     padding: 20px;
+    box-sizing: border-box; /* Garante que o padding não causa scroll */
+  }
+  #login-content { /* Um container centralizado para os campos */
+      max-width:320px;
+      width: 100%;
+      padding: 20px;
+      border-radius: 12px;
+      background: var(--card);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
   }
   #password-input {
-    max-width:300px; 
     margin: 10px 0 20px 0;
     text-align: center;
+    max-width: 100%;
   }
 </style>
 </head>
 <body>
   
   <div id="login-screen">
-    <h2 style="font-size: 20px;">Acesso Restrito</h2>
-    <input type="password" id="password-input" placeholder="Insira a Palavra-chave" autofocus>
-    <button id="login-button" style="max-width:300px;">Entrar</button>
-    <div class="muted" style="margin-top: 15px; text-align: center;">Esta password é apenas para fins de acesso rápido e não está totalmente protegida.</div>
+    <div id="login-content">
+        <h2 style="font-size: 20px;">Acesso Restrito</h2>
+        <input type="password" id="password-input" placeholder="Insira a Palavra-chave" autofocus>
+        <button id="login-button">Entrar</button>
+        <div class="muted" style="margin-top: 15px; font-size: 11px;">Esta password é apenas para fins de acesso rápido e não está totalmente protegida.</div>
+    </div>
   </div>
   <div class="container" id="app">
     <h1>Pedido de Renovação de Receita</h1>
@@ -143,10 +155,8 @@ function checkPassword() {
 
     if (passwordInput.value === CORRECT_PASSWORD) {
         isAuthenticated = true;
-        loginScreen.style.display = 'none'; // Esconde a tela de login
-        // Permite que o Safari e o Chrome no iOS perguntem se quer guardar a password
-        // para usar o Face ID/Touch ID na próxima vez.
-        popularSelect(); 
+        loginScreen.style.display = 'none'; // ESCONDE A TELA DE LOGIN
+        popularSelect(); // INICIA O CARREGAMENTO DOS DADOS (FUNÇÃO ESTABILIZADA)
     } else if (passwordInput.value.length > 0) {
         alert('Palavra-chave incorreta.');
         passwordInput.value = '';
@@ -240,6 +250,7 @@ const listaMedicamentos = document.getElementById('listaMedicamentos');
 const obsEl = document.getElementById('obs');
 const emailPreview = document.getElementById('emailPreview');
 const subjectElement = document.getElementById('emailSubject');
+// subjectUtenteName foi removido do HTML corrigido
 const editorPanel = document.getElementById('editorPanel');
 const editorArea = document.getElementById('editorArea');
 const themeToggle = document.getElementById('themeToggle');
@@ -458,9 +469,11 @@ saveEditor.addEventListener('click', () => {
 
 
 /* ===== Initialization ===== */
-// popularSelect() foi movida para dentro da função checkPassword, 
-// para só carregar os dados após o login.
-// O resto do código (ThemeToggle, etc.) corre normalmente.
+// popularSelect() só é chamado após o login
+// Se o login for feito, a popularSelect() inicia o resto
+// Se a página for aberta sem login, ela espera
+// O ThemeToggle carrega e corre no início, fora do DOMContentLoaded,
+// mas foi movido para dentro do DOMContentLoaded para estabilidade.
 }); 
 </script>
 </body>
