@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Pedido de Receitas</title>
+<style>
+  /* [ESTILOS GERAIS MANTIDOS] */
+  :root{
+    --bg:#f7f7f7; --card:#fff; --text:#111; --muted:#666; --accent:#0b76ef;
+    --btn-bg: #ffffff; --btn-text: var(--text); --btn-border: rgba(0,0,0,0.08);
+    --btn-secondary-bg: #f5f5f5;
+  }
+  .dark{
+    --bg:#0b1020; --card:#0f1724; --text:#e6eef8; --muted:#9aa6b2; --accent:#4dabf7;
+    --btn-bg: #0b1220; --btn-text: var(--text); --btn-border: rgba(255,255,255,0.06);
+    --btn-secondary-bg: #1a2233;
+  }
+  html,body{height:100%}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:0;padding:18px;background:var(--bg);color:var(--text)}
+  .container{max-width:760px;margin:0 auto;background:var(--card);border-radius:12px;padding:14px;box-shadow:0 8px 24px rgba(2,6,23,0.12)}
+  h1{font-size:18px;margin:0 0 10px 0;text-align:center}
+
+  /* inputs/buttons */
+  select,textarea,button,input[type=text]{width:100%;padding:12px;font-size:16px;border-radius:8px;border:1px solid var(--btn-border);box-sizing:border-box;background:transparent;color:var(--text)}
+  button{background:var(--btn-bg);color:var(--btn-text);border:1px solid var(--btn-border);cursor:pointer}
+  .btn-secondary{background:var(--btn-secondary-bg);}
+
+
+  /* dark theme select improvements */
+  .dark select{background:#0b1220;color:var(--text);border:1px solid rgba(255,255,255,0.06)}
+  .dark select option{background:#0f1724;color:var(--text)}
+
+  .controls{display:flex;gap:8px;margin-top:10px}
+  .controls button{flex:1}
+  .med-list{margin-top:12px;max-height:260px;overflow:auto;padding-right:6px}
+  .med-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
+  .med-item:not(:last-child){margin-bottom:8px}
+  .muted{color:var(--muted);font-size:13px}
+  .preview{white-space:pre-wrap;background:transparent;border:1px dashed rgba(0,0,0,0.06);padding:10px;border-radius:8px;margin-top:10px;color:var(--muted)}
+  .editor{margin-top:12px;border-radius:8px;padding:10px;border:1px dashed rgba(0,0,0,0.06);background:transparent}
+  .hidden{display:none}
+  footer{margin-top:12px;font-size:13px;color:var(--muted);text-align:center}
+  @media(max-width:420px){.container{padding:12px}h1{font-size:16px}.med-item{font-size:15px;padding:8px)}
+
+  /* NOVO ESTILO: TELA DE LOGIN */
+  #login-screen {
+    position:fixed; top:0; left:0; width:100%; height:100%; 
+    background:var(--bg); 
+    z-index:9999; 
+    display:flex; 
+    flex-direction:column; 
+    justify-content:center; 
+    align-items:center; 
+    color:var(--text);
+    padding: 20px;
+  }
+  #password-input {
+    max-width:300px; 
+    margin: 10px 0 20px 0;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  
+  <div id="login-screen">
+    <h2 style="font-size: 20px;">Acesso Restrito</h2>
+    <input type="password" id="password-input" placeholder="Insira a Palavra-chave" autofocus>
+    <button id="login-button" style="max-width:300px;">Entrar</button>
+    <div class="muted" style="margin-top: 15px; text-align: center;">Esta password é apenas para fins de acesso rápido e não está totalmente protegida.</div>
+  </div>
+  <div class="container" id="app">
+    <h1>Pedido de Renovação de Receita</h1>
+
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <select id="utenteSelect" aria-label="Escolher utente" style="max-width:220px"></select>
+      <div style="flex:1"></div>
+      <button id="themeToggle" type="button" style="max-width:140px">Tema escuro</button>
+    </div>
+
+    <div class="controls">
+      <button id="selectAllBtn" type="button">Selecionar tudo</button>
+      <button id="deselectAllBtn" type="button">Desmarcar tudo</button>
+    </div>
+
+    <div id="listaMedicamentos" class="med-list" aria-live="polite"></div>
+
+    <div style="margin-top:10px">
+      <label class="muted">Observações para a médica</label>
+      <textarea id="obs" placeholder="Ex.: 'Repetir apenas 30 dias'"></textarea>
+    </div>
+
+    <div style="margin-top:10px" class="controls">
+      <button id="btnPreparar" type="button" style="flex:2">Preparar Email</button>
+      <button id="btnEditar" type="button" class="btn-secondary" style="flex:1">Editar utente</button>
+    </div>
+
+    <div id="emailSubject" class="hidden">Ao cuidado da Doutora Ana Isabel Silva</div>
+
+    <div style="margin-top:10px">
+      <div class="muted">Preview do corpo do e-mail</div>
+      <div id="emailPreview" class="preview" tabindex="0"></div>
+    </div>
+
+    <div style="margin-top:10px" class="controls">
+      <button id="copyAllBtn" type="button" style="flex:1">Copiar tudo</button>
+    </div>
+
+    <div id="editorPanel" class="editor hidden">
+      <div class="muted" style="margin-bottom:6px">Editor do ficheiro do utente (1ª linha = identificação; linhas seguintes = Medicamento | Dosagem)</div>
+      <textarea id="editorArea" style="min-height:160px"></textarea>
+      <div class="controls" style="margin-top:8px">
+        <button id="saveEditor">Guardar</button>
+        <button id="cancelEditor" class="btn-secondary">Cancelar</button>
+      </div>
+    </div>
+
+    <footer>
+      <div class="muted">Podes editar os dados e serão guardados no telemóvel automaticamente.</div>
+      <div class="muted" style="margin-top:6px">Para teres como app no o ecrã principal: abre a página em Safari e escolhe <strong>Partilhar → Adicionar ao Ecrã Principal</strong>.</div>
+    </footer>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    
+/* ========================================= */
+/* ===== NOVO: LÓGICA DE LOGIN SIMPLES ===== */
+/* ========================================= */
+const loginScreen = document.getElementById('login-screen');
+const passwordInput = document.getElementById('password-input');
+const loginButton = document.getElementById('login-button');
+
+// ATENÇÃO: COLOQUE A SUA PALAVRA-CHAVE OU PIN AQUI
+const CORRECT_PASSWORD = '0672'; 
+// Use um PIN simples de 4 dígitos ou uma palavra-chave fácil.
+
+let isAuthenticated = false;
+
+function checkPassword() {
+    if (isAuthenticated) return; 
+
+    if (passwordInput.value === CORRECT_PASSWORD) {
+        isAuthenticated = true;
+        loginScreen.style.display = 'none'; // Esconde a tela de login
+        // Permite que o Safari e o Chrome no iOS perguntem se quer guardar a password
+        // para usar o Face ID/Touch ID na próxima vez.
+        popularSelect(); 
+    } else if (passwordInput.value.length > 0) {
+        alert('Palavra-chave incorreta.');
+        passwordInput.value = '';
+        passwordInput.focus();
+    }
+}
+
+// Verifica se a password já foi preenchida pelo gestor de passwords (Face ID/Touch ID)
+if (passwordInput.value === CORRECT_PASSWORD) {
+    checkPassword();
+} else {
+    // Adiciona listener para o botão e para a tecla Enter
+    loginButton.addEventListener('click', checkPassword);
+    passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') checkPassword();
+    });
+}
+/* ========================================= */
+/* ===== FIM DA LÓGICA DE LOGIN SIMPLES ===== */
+/* ========================================= */
+
+
+/* ===== Default data (embedded) ===== */
+const DEFAULT_UTENTES = {
+  "Hugo": `Hugo Silva | 168699797 | 15/06/1972
+Free Style Libre 2 Plus | Sensor
+Trulicity | Caneta Injectavel
+Bisoprolol | 5 mg
+Rosuvastatina | 20 mg
+Ramipril | 1.25 mg
+Aspirina GR | 100 mg
+Synjardy | 12.5 mg + 1000 mg
+Fenofibrato | 200 mg`,
+  "Rosa": `Maria Rosa C. Balhaster | 180385256 | 30/07/1944
+Paracetamol | 1000 mg
+Losartan | 100 mg
+Acemetacina | 60 mg
+Sedoxil | 1 mg
+Metformina | 1000 mg
+Sertralina | 100 mg`,
+  "Neca": `Manuel Arnaldo F. Silva | 160966178 | 31/08/1942
+Paracetamol | 1000 mg
+Pantoprazol | 20 mg
+Ramipril | 2.5 mg
+Rosuvastatina + Ezetimiba | 20 mg + 10 mg
+Travoprost | 0.03 mg
+Ácido Acetilsalicílico (Tromalyt) | 150 mg
+Tamsulosina | 0.4 mg
+Jardiance | 10 mg
+EyeCare | `
+};
+
+/* ===== Persistence ===== */
+const STORAGE_KEY = 'pedido_receitas_utentes_v1';
+const THEME_KEY = 'theme_preference';
+
+function loadUtentes(){
+  try{ 
+    const raw = localStorage.getItem(STORAGE_KEY); 
+    if(!raw) return JSON.parse(JSON.stringify(DEFAULT_UTENTES));
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
+        return JSON.parse(JSON.stringify(DEFAULT_UTENTES));
+    }
+    return parsed;
+  }catch(e){ 
+    console.warn('loadUtentes erro: Dados locais corrompidos. A reverter para o padrão.', e); 
+    return JSON.parse(JSON.stringify(DEFAULT_UTENTES)); 
+  }
+}
+function saveUtentes(obj){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }catch(e){ console.warn('saveUtentes erro',e); } }
+let utentes = loadUtentes();
+
+/* ===== Utils ===== */
+function parseMedLine(line){ const parts = line.split('|').map(p=>p.trim()); return { name: parts[0]||'', dose: parts[1]||'' }; }
+function formatDisplay(name,dose){ return dose? `${name} — ${dose}` : name; }
+function normalizeUtenteText(txt){ 
+  const lines = txt.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(lines.length===0) return '';
+  const out = [lines[0]]; 
+  for(let i=1;i<lines.length;i++){
+    const parts = lines[i].split('|').map(p=>p.trim());
+    if(parts.length===1) out.push(parts[0]); else out.push(`${parts[0]} | ${parts.slice(1).join(' | ')}`);
+  }
+  return out.join('\n');
+}
+
+/* ===== UI references ===== */
+const utenteSelect = document.getElementById('utenteSelect');
+const listaMedicamentos = document.getElementById('listaMedicamentos');
+const obsEl = document.getElementById('obs');
+const emailPreview = document.getElementById('emailPreview');
+const subjectElement = document.getElementById('emailSubject');
+const editorPanel = document.getElementById('editorPanel');
+const editorArea = document.getElementById('editorArea');
+const themeToggle = document.getElementById('themeToggle');
+const copyAllBtn = document.getElementById('copyAllBtn');
+
+const selectAllBtn = document.getElementById('selectAllBtn');
+const deselectAllBtn = document.getElementById('deselectAllBtn');
+const btnPreparar = document.getElementById('btnPreparar');
+const btnEditar = document.getElementById('btnEditar');
+const saveEditor = document.getElementById('saveEditor');
+const cancelEditor = document.getElementById('cancelEditor');
+
+
+/* hidden subject value (used in mailto) */
+window.identificacao = ''; 
+
+/* ===== Theme Toggle ===== */
+function toggleTheme() {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    themeToggle.textContent = isDark ? 'Tema claro' : 'Tema escuro';
+    localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+}
+
+function loadTheme() {
+    const savedTheme = localStorage.getItem(THEME_KEY) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+    }
+    themeToggle.textContent = savedTheme === 'dark' ? 'Tema claro' : 'Tema escuro';
+}
+themeToggle.addEventListener('click', toggleTheme);
+loadTheme();
+
+
+/* ===== Preview Logic (CORE) ===== */
+function updatePreview(){
+  const medCheckboxes = listaMedicamentos.querySelectorAll('input[type="checkbox"]:checked');
+  const medicamentosSelecionados = Array.from(medCheckboxes)
+    .map(cb => formatDisplay(cb.dataset.name, cb.dataset.dose))
+    .join('\n');
+
+  const observacoes = obsEl.value.trim();
+
+  let emailBody = `Exma. Senhora Dra. Ana Isabel Silva,
+
+
+Venho por este meio solicitar a renovação das seguintes receitas para o utente indicado:
+
+${window.identificacao}
+
+Medicamentos:
+${medicamentosSelecionados}
+`;
+
+  if(observacoes){
+    emailBody += `
+
+Observações:
+${observacoes}
+`;
+  }
+
+  emailBody += `
+
+Com os melhores cumprimentos,
+Hugo Silva`;
+
+  emailPreview.textContent = emailBody;
+}
+
+/* ===== Load / render (FUNÇÃO SÓ CORRE APÓS LOGIN) ===== */
+function carregarUtente(){
+  const key = utenteSelect.value;
+  const txt = utentes[key]||'';
+  const linhas = txt.split('\n').map(s=>s.trim()).filter(Boolean);
+
+  window.identificacao = linhas[0]||'';
+  listaMedicamentos.innerHTML='';
+  obsEl.value = ''; 
+
+  for(let i=1;i<linhas.length;i++){
+    const medLine = linhas[i];
+    const {name,dose} = parseMedLine(medLine);
+
+    const div = document.createElement('div');
+    div.className = 'med-item';
+
+    const label = document.createElement('label');
+    label.style.display = 'flex'; label.style.alignItems = 'center'; label.style.gap = '10px';
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = true;
+    cb.dataset.name = name; cb.dataset.dose = dose;
+    cb.addEventListener('change', updatePreview);
+
+    const span = document.createElement('span');
+    span.textContent = formatDisplay(name,dose);
+
+    label.appendChild(cb); label.appendChild(span);
+    div.appendChild(label);
+    listaMedicamentos.appendChild(div);
+  }
+
+  updatePreview();
+}
+
+function popularSelect(){
+  utenteSelect.innerHTML = ''; 
+  const keys = Object.keys(utentes).sort();
+
+  keys.forEach(key => {
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = key;
+    utenteSelect.appendChild(option);
+  });
+
+  if(keys.length > 0){
+    utenteSelect.value = keys[0]; 
+  }
+
+  utenteSelect.addEventListener('change', carregarUtente);
+  carregarUtente();
+}
+
+/* ===== Event Listeners ===== */
+
+// Select/Deselect All
+selectAllBtn.addEventListener('click', () => {
+    listaMedicamentos.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.checked = true;
+    });
+    updatePreview();
+});
+
+deselectAllBtn.addEventListener('click', () => {
+    listaMedicamentos.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+    });
+    updatePreview();
+});
+
+obsEl.addEventListener('input', updatePreview);
+
+
+// Prepare Email (Mailto)
+btnPreparar.addEventListener('click', () => {
+    const subject = subjectElement.textContent.trim();
+    const body = emailPreview.textContent.trim();
+
+    const mailtoLink = `mailto:usf.gaya@ulsge.min-saude.pt?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+});
+
+
+// Copy All
+copyAllBtn.addEventListener('click', async () => {
+    const textToCopy = emailPreview.textContent.trim();
+    try {
+        await navigator.clipboard.writeText(textToCopy);
+        copyAllBtn.textContent = 'Copiado!';
+    } catch (err) {
+        console.error('Falha ao copiar:', err);
+        copyAllBtn.textContent = 'Erro ao copiar!';
+    }
+    setTimeout(() => {
+        copyAllBtn.textContent = 'Copiar tudo';
+    }, 2000);
+});
+
+// Editor Logic
+function showEditor() {
+    const key = utenteSelect.value;
+    editorArea.value = utentes[key] || '';
+    editorPanel.classList.remove('hidden');
+    
+    document.getElementById('listaMedicamentos').classList.add('hidden');
+    document.getElementById('obs').parentElement.classList.add('hidden');
+    document.querySelector('.controls').classList.add('hidden');
+    btnPreparar.parentElement.classList.add('hidden');
+    emailPreview.parentElement.classList.add('hidden');
+    copyAllBtn.parentElement.classList.add('hidden');
+}
+
+function hideEditor() {
+    editorPanel.classList.add('hidden');
+    
+    document.getElementById('listaMedicamentos').classList.remove('hidden');
+    document.getElementById('obs').parentElement.classList.remove('hidden');
+    document.querySelector('.controls').classList.remove('hidden');
+    btnPreparar.parentElement.classList.remove('hidden');
+    emailPreview.parentElement.classList.remove('hidden');
+    copyAllBtn.parentElement.classList.remove('hidden');
+}
+
+btnEditar.addEventListener('click', showEditor);
+
+cancelEditor.addEventListener('click', () => {
+    hideEditor();
+    carregarUtente(); 
+});
+
+saveEditor.addEventListener('click', () => {
+    const key = utenteSelect.value;
+    const normalizedText = normalizeUtenteText(editorArea.value);
+
+    // Save
+    utentes[key] = normalizedText;
+    saveUtentes(utentes);
+
+    // Update UI
+    hideEditor();
+    popularSelect();
+});
+
+
+/* ===== Initialization ===== */
+// popularSelect() foi movida para dentro da função checkPassword, 
+// para só carregar os dados após o login.
+// O resto do código (ThemeToggle, etc.) corre normalmente.
+}); 
+</script>
+</body>
+</html>
