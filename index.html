@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Pedido de Receitas</title>
 <style>
-  /* [ESTILOS GERAIS MANTIDOS] */
   :root{
     --bg:#f7f7f7; --card:#fff; --text:#111; --muted:#666; --accent:#0b76ef;
     --btn-bg: #ffffff; --btn-text: var(--text); --btn-border: rgba(0,0,0,0.08);
@@ -20,17 +19,11 @@
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:0;padding:18px;background:var(--bg);color:var(--text)}
   .container{max-width:760px;margin:0 auto;background:var(--card);border-radius:12px;padding:14px;box-shadow:0 8px 24px rgba(2,6,23,0.12)}
   h1{font-size:18px;margin:0 0 10px 0;text-align:center}
-
-  /* inputs/buttons */
   select,textarea,button,input[type=text],input[type=password]{width:100%;padding:12px;font-size:16px;border-radius:8px;border:1px solid var(--btn-border);box-sizing:border-box;background:transparent;color:var(--text)}
   button{background:var(--btn-bg);color:var(--btn-text);border:1px solid var(--btn-border);cursor:pointer}
   .btn-secondary{background:var(--btn-secondary-bg);}
-
-
-  /* dark theme select improvements */
   .dark select{background:#0b1220;color:var(--text);border:1px solid rgba(255,255,255,0.06)}
   .dark select option{background:#0f1724;color:var(--text)}
-
   .controls{display:flex;gap:8px;margin-top:10px}
   .controls button{flex:1}
   .med-list{margin-top:12px;max-height:260px;overflow:auto;padding-right:6px}
@@ -41,39 +34,19 @@
   .editor{margin-top:12px;border-radius:8px;padding:10px;border:1px dashed rgba(0,0,0,0.06);background:transparent}
   .hidden{display:none}
   footer{margin-top:12px;font-size:13px;color:var(--muted);text-align:center}
-  @media(max-width:420px){.container{padding:12px}h1{font-size:16px}.med-item{font-size:15px;padding:8px)}
+  @media(max-width:420px){
+    .container{padding:12px}
+    h1{font-size:16px}
+    .med-item{font-size:15px;padding:8px}
+  }
 
-  /* CORREÇÃO ESTILO: TELA DE LOGIN para cobrir a página toda */
-  #login-screen {
-    position:fixed; top:0; left:0; width:100%; height:100%; 
-    background:var(--bg); 
-    z-index:9999; 
-    display:flex; 
-    flex-direction:column; 
-    justify-content:center; 
-    align-items:center; 
-    color:var(--text);
-    padding: 20px;
-    box-sizing: border-box; /* Garante que o padding não causa scroll */
-  }
-  #login-content { /* Um container centralizado para os campos */
-      max-width:320px;
-      width: 100%;
-      padding: 20px;
-      border-radius: 12px;
-      background: var(--card);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: center;
-  }
-  #password-input {
-    margin: 10px 0 20px 0;
-    text-align: center;
-    max-width: 100%;
-  }
+  /* Login screen */
+  #login-screen { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; color:var(--text); padding:20px; box-sizing:border-box; }
+  #login-content { max-width:320px; width:100%; padding:20px; border-radius:12px; background:var(--card); box-shadow:0 4px 12px rgba(0,0,0,0.1); text-align:center; }
+  #password-input { margin:10px 0 20px 0; text-align:center; max-width:100%; }
 </style>
 </head>
 <body>
-  
   <div id="login-screen">
     <div id="login-content">
         <h2 style="font-size: 20px;">Acesso Restrito</h2>
@@ -82,7 +55,8 @@
         <div class="muted" style="margin-top: 15px; font-size: 11px;">Esta password é apenas para fins de acesso rápido e não está totalmente protegida.</div>
     </div>
   </div>
-  <div class="container" id="app">
+
+  <div class="container" id="app" aria-hidden="true">
     <h1>Pedido de Renovação de Receita</h1>
 
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
@@ -91,7 +65,7 @@
       <button id="themeToggle" type="button" style="max-width:140px">Tema escuro</button>
     </div>
 
-    <div class="controls">
+    <div class="controls" id="control-row-1">
       <button id="selectAllBtn" type="button">Selecionar tudo</button>
       <button id="deselectAllBtn" type="button">Desmarcar tudo</button>
     </div>
@@ -103,7 +77,7 @@
       <textarea id="obs" placeholder="Ex.: 'Repetir apenas 30 dias'"></textarea>
     </div>
 
-    <div style="margin-top:10px" class="controls">
+    <div style="margin-top:10px" class="controls" id="control-row-2">
       <button id="btnPreparar" type="button" style="flex:2">Preparar Email</button>
       <button id="btnEditar" type="button" class="btn-secondary" style="flex:1">Editar utente</button>
     </div>
@@ -115,11 +89,11 @@
       <div id="emailPreview" class="preview" tabindex="0"></div>
     </div>
 
-    <div style="margin-top:10px" class="controls">
+    <div style="margin-top:10px" class="controls" id="control-row-3">
       <button id="copyAllBtn" type="button" style="flex:1">Copiar tudo</button>
     </div>
 
-    <div id="editorPanel" class="editor hidden">
+    <div id="editorPanel" class="editor hidden" aria-hidden="true">
       <div class="muted" style="margin-bottom:6px">Editor do ficheiro do utente (1ª linha = identificação; linhas seguintes = Medicamento | Dosagem)</div>
       <textarea id="editorArea" style="min-height:160px"></textarea>
       <div class="controls" style="margin-top:8px">
@@ -136,345 +110,218 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    
-/* ========================================= */
-/* ===== NOVO: LÓGICA DE LOGIN SIMPLES ===== */
-/* ========================================= */
-const loginScreen = document.getElementById('login-screen');
-const passwordInput = document.getElementById('password-input');
-const loginButton = document.getElementById('login-button');
 
-// ATENÇÃO: COLOQUE A SUA PALAVRA-CHAVE OU PIN AQUI
-const CORRECT_PASSWORD = '0672'; 
-// Use um PIN simples de 4 dígitos ou uma palavra-chave fácil.
+  /* ============== LOGIN ============== */
+  const loginScreen = document.getElementById('login-screen');
+  const passwordInput = document.getElementById('password-input');
+  const loginButton = document.getElementById('login-button');
+  const CORRECT_PASSWORD = '0672'; // se for só para ti ok, se não, muda
 
-let isAuthenticated = false;
-
-function checkPassword() {
-    if (isAuthenticated) return; 
-
+  let isAuthenticated = false;
+  function checkPassword() {
+    if (isAuthenticated) return;
     if (passwordInput.value === CORRECT_PASSWORD) {
-        isAuthenticated = true;
-        loginScreen.style.display = 'none'; // ESCONDE A TELA DE LOGIN
-        popularSelect(); // INICIA O CARREGAMENTO DOS DADOS (FUNÇÃO ESTABILIZADA)
+      isAuthenticated = true;
+      loginScreen.style.display = 'none';
+      document.getElementById('app').removeAttribute('aria-hidden');
+      popularSelect();
     } else if (passwordInput.value.length > 0) {
-        alert('Palavra-chave incorreta.');
-        passwordInput.value = '';
-        passwordInput.focus();
+      alert('Palavra-chave incorreta.');
+      passwordInput.value = '';
+      passwordInput.focus();
     }
-}
+  }
+  loginButton.addEventListener('click', checkPassword);
+  passwordInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') checkPassword(); });
 
-// Verifica se a password já foi preenchida pelo gestor de passwords (Face ID/Touch ID)
-if (passwordInput.value === CORRECT_PASSWORD) {
-    checkPassword();
-} else {
-    // Adiciona listener para o botão e para a tecla Enter
-    loginButton.addEventListener('click', checkPassword);
-    passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') checkPassword();
-    });
-}
-/* ========================================= */
-/* ===== FIM DA LÓGICA DE LOGIN SIMPLES ===== */
-/* ========================================= */
-
-
-/* ===== Default data (embedded) ===== */
-const DEFAULT_UTENTES = {
-  "Hugo": `Hugo Silva | 168699797 | 15/06/1972
+  /* ============== DATA & STORAGE ============== */
+  const DEFAULT_UTENTES = {
+    "Hugo": `Hugo Silva | 168699797 | 15/06/1972
 Free Style Libre 2 Plus | Sensor
 Trulicity | Caneta Injectavel
-Bisoprolol | 5 mg
-Rosuvastatina | 20 mg
-Ramipril | 1.25 mg
-Aspirina GR | 100 mg
-Synjardy | 12.5 mg + 1000 mg
-Fenofibrato | 200 mg`,
-  "Rosa": `Maria Rosa C. Balhaster | 180385256 | 30/07/1944
-Paracetamol | 1000 mg
-Losartan | 100 mg
-Acemetacina | 60 mg
-Sedoxil | 1 mg
-Metformina | 1000 mg
-Sertralina | 100 mg`,
-  "Neca": `Manuel Arnaldo F. Silva | 160966178 | 31/08/1942
-Paracetamol | 1000 mg
-Pantoprazol | 20 mg
-Ramipril | 2.5 mg
-Rosuvastatina + Ezetimiba | 20 mg + 10 mg
-Travoprost | 0.03 mg
-Ácido Acetilsalicílico (Tromalyt) | 150 mg
-Tamsulosina | 0.4 mg
-Jardiance | 10 mg
-EyeCare | `
-};
+Bisoprolol | 5 mg`,
+    "Rosa": `Maria Rosa C. Balhaster | 180385256 | 30/07/1944
+Paracetamol | 1000 mg`,
+    "Neca": `Manuel Arnaldo F. Silva | 160966178 | 31/08/1942
+Paracetamol | 1000 mg`
+  };
 
-/* ===== Persistence ===== */
-const STORAGE_KEY = 'pedido_receitas_utentes_v1';
-const THEME_KEY = 'theme_preference';
+  const STORAGE_KEY = 'pedido_receitas_utentes_v1';
+  const THEME_KEY = 'theme_preference';
+  function loadUtentes(){
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return JSON.parse(JSON.stringify(DEFAULT_UTENTES));
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) return JSON.parse(JSON.stringify(DEFAULT_UTENTES));
+      return parsed;
+    } catch(e) { console.warn('loadUtentes erro', e); return JSON.parse(JSON.stringify(DEFAULT_UTENTES)); }
+  }
+  function saveUtentes(obj){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }catch(e){ console.warn('saveUtentes erro',e); } }
+  let utentes = loadUtentes();
 
-function loadUtentes(){
-  try{ 
-    const raw = localStorage.getItem(STORAGE_KEY); 
-    if(!raw) return JSON.parse(JSON.stringify(DEFAULT_UTENTES));
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object' || Object.keys(parsed).length === 0) {
-        return JSON.parse(JSON.stringify(DEFAULT_UTENTES));
+  /* ============== HELPERS ============== */
+  function parseMedLine(line){ const parts = line.split('|').map(p=>p.trim()); return { name: parts[0]||'', dose: parts[1]||'' }; }
+  function formatDisplay(name,dose){ return dose? `${name} — ${dose}` : name; }
+  function normalizeUtenteText(txt){
+    const lines = txt.split('\n').map(l=>l.trim()).filter(Boolean);
+    if(lines.length===0) return '';
+    const out = [lines[0]];
+    for(let i=1;i<lines.length;i++){
+      const parts = lines[i].split('|').map(p=>p.trim());
+      if(parts.length===1) out.push(parts[0]); else out.push(`${parts[0]} | ${parts.slice(1).join(' | ')}`);
     }
-    return parsed;
-  }catch(e){ 
-    console.warn('loadUtentes erro: Dados locais corrompidos. A reverter para o padrão.', e); 
-    return JSON.parse(JSON.stringify(DEFAULT_UTENTES)); 
+    return out.join('\n');
   }
-}
-function saveUtentes(obj){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); }catch(e){ console.warn('saveUtentes erro',e); } }
-let utentes = loadUtentes();
 
-/* ===== Utils ===== */
-function parseMedLine(line){ const parts = line.split('|').map(p=>p.trim()); return { name: parts[0]||'', dose: parts[1]||'' }; }
-function formatDisplay(name,dose){ return dose? `${name} — ${dose}` : name; }
-function normalizeUtenteText(txt){ 
-  const lines = txt.split('\n').map(l=>l.trim()).filter(Boolean);
-  if(lines.length===0) return '';
-  const out = [lines[0]]; 
-  for(let i=1;i<lines.length;i++){
-    const parts = lines[i].split('|').map(p=>p.trim());
-    if(parts.length===1) out.push(parts[0]); else out.push(`${parts[0]} | ${parts.slice(1).join(' | ')}`);
+  /* ============== UI REFS ============== */
+  const utenteSelect = document.getElementById('utenteSelect');
+  const listaMedicamentos = document.getElementById('listaMedicamentos');
+  const obsEl = document.getElementById('obs');
+  const emailPreview = document.getElementById('emailPreview');
+  const subjectElement = document.getElementById('emailSubject');
+  const editorPanel = document.getElementById('editorPanel');
+  const editorArea = document.getElementById('editorArea');
+  const themeToggle = document.getElementById('themeToggle');
+  const copyAllBtn = document.getElementById('copyAllBtn');
+
+  const selectAllBtn = document.getElementById('selectAllBtn');
+  const deselectAllBtn = document.getElementById('deselectAllBtn');
+  const btnPreparar = document.getElementById('btnPreparar');
+  const btnEditar = document.getElementById('btnEditar');
+  const saveEditor = document.getElementById('saveEditor');
+  const cancelEditor = document.getElementById('cancelEditor');
+
+  window.identificacao = '';
+
+  /* ============== THEME ============== */
+  function applyTheme(isDark){
+    if(isDark) document.body.classList.add('dark'); else document.body.classList.remove('dark');
+    themeToggle.textContent = isDark? 'Tema claro' : 'Tema escuro';
+    try{ localStorage.setItem(THEME_KEY, isDark? 'dark' : 'light'); }catch(e){}
   }
-  return out.join('\n');
-}
+  themeToggle.addEventListener('click', ()=> applyTheme(!document.body.classList.contains('dark')));
+  (function(){ try{ const t = localStorage.getItem(THEME_KEY) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); applyTheme(t==='dark'); }catch(e){} })();
 
-/* ===== UI references ===== */
-const utenteSelect = document.getElementById('utenteSelect');
-const listaMedicamentos = document.getElementById('listaMedicamentos');
-const obsEl = document.getElementById('obs');
-const emailPreview = document.getElementById('emailPreview');
-const subjectElement = document.getElementById('emailSubject');
-// subjectUtenteName foi removido do HTML corrigido
-const editorPanel = document.getElementById('editorPanel');
-const editorArea = document.getElementById('editorArea');
-const themeToggle = document.getElementById('themeToggle');
-const copyAllBtn = document.getElementById('copyAllBtn');
-
-const selectAllBtn = document.getElementById('selectAllBtn');
-const deselectAllBtn = document.getElementById('deselectAllBtn');
-const btnPreparar = document.getElementById('btnPreparar');
-const btnEditar = document.getElementById('btnEditar');
-const saveEditor = document.getElementById('saveEditor');
-const cancelEditor = document.getElementById('cancelEditor');
-
-
-/* hidden subject value (used in mailto) */
-window.identificacao = ''; 
-
-/* ===== Theme Toggle ===== */
-function toggleTheme() {
-    document.body.classList.toggle('dark');
-    const isDark = document.body.classList.contains('dark');
-    themeToggle.textContent = isDark ? 'Tema claro' : 'Tema escuro';
-    localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
-}
-
-function loadTheme() {
-    const savedTheme = localStorage.getItem(THEME_KEY) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark');
+  /* ============== PREVIEW ============== */
+  function updatePreview(){
+    const medCheckboxes = listaMedicamentos.querySelectorAll('input[type="checkbox"]:checked');
+    const medicamentosSelecionados = Array.from(medCheckboxes).map(cb => formatDisplay(cb.dataset.name, cb.dataset.dose)).join('\n');
+    const observacoes = obsEl.value.trim();
+    let emailBody = `Exma. Senhora Dra. Ana Isabel Silva,\n\nVenho por este meio solicitar a renovação das seguintes receitas para o utente indicado:\n\n${window.identificacao}\n\nMedicamentos:\n${medicamentosSelecionados}\n`;
+    if(observacoes){
+      emailBody += `\nObservações:\n${observacoes}\n`;
     }
-    themeToggle.textContent = savedTheme === 'dark' ? 'Tema claro' : 'Tema escuro';
-}
-themeToggle.addEventListener('click', toggleTheme);
-loadTheme();
-
-
-/* ===== Preview Logic (CORE) ===== */
-function updatePreview(){
-  const medCheckboxes = listaMedicamentos.querySelectorAll('input[type="checkbox"]:checked');
-  const medicamentosSelecionados = Array.from(medCheckboxes)
-    .map(cb => formatDisplay(cb.dataset.name, cb.dataset.dose))
-    .join('\n');
-
-  const observacoes = obsEl.value.trim();
-
-  let emailBody = `Exma. Senhora Dra. Ana Isabel Silva,
-
-
-Venho por este meio solicitar a renovação das seguintes receitas para o utente indicado:
-
-${window.identificacao}
-
-Medicamentos:
-${medicamentosSelecionados}
-`;
-
-  if(observacoes){
-    emailBody += `
-
-Observações:
-${observacoes}
-`;
+    emailBody += `\nCom os melhores cumprimentos,\nHugo Silva`;
+    emailPreview.textContent = emailBody;
   }
 
-  emailBody += `
-
-Com os melhores cumprimentos,
-Hugo Silva`;
-
-  emailPreview.textContent = emailBody;
-}
-
-/* ===== Load / render (FUNÇÃO SÓ CORRE APÓS LOGIN) ===== */
-function carregarUtente(){
-  const key = utenteSelect.value;
-  const txt = utentes[key]||'';
-  const linhas = txt.split('\n').map(s=>s.trim()).filter(Boolean);
-
-  window.identificacao = linhas[0]||'';
-  listaMedicamentos.innerHTML='';
-  obsEl.value = ''; 
-
-  for(let i=1;i<linhas.length;i++){
-    const medLine = linhas[i];
-    const {name,dose} = parseMedLine(medLine);
-
-    const div = document.createElement('div');
-    div.className = 'med-item';
-
-    const label = document.createElement('label');
-    label.style.display = 'flex'; label.style.alignItems = 'center'; label.style.gap = '10px';
-
-    const cb = document.createElement('input');
-    cb.type = 'checkbox'; cb.checked = true;
-    cb.dataset.name = name; cb.dataset.dose = dose;
-    cb.addEventListener('change', updatePreview);
-
-    const span = document.createElement('span');
-    span.textContent = formatDisplay(name,dose);
-
-    label.appendChild(cb); label.appendChild(span);
-    div.appendChild(label);
-    listaMedicamentos.appendChild(div);
-  }
-
-  updatePreview();
-}
-
-function popularSelect(){
-  utenteSelect.innerHTML = ''; 
-  const keys = Object.keys(utentes).sort();
-
-  keys.forEach(key => {
-    const option = document.createElement('option');
-    option.value = key;
-    option.textContent = key;
-    utenteSelect.appendChild(option);
-  });
-
-  if(keys.length > 0){
-    utenteSelect.value = keys[0]; 
-  }
-
-  utenteSelect.addEventListener('change', carregarUtente);
-  carregarUtente();
-}
-
-/* ===== Event Listeners ===== */
-
-// Select/Deselect All
-selectAllBtn.addEventListener('click', () => {
-    listaMedicamentos.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.checked = true;
-    });
+  /* ============== RENDER UTENTE ============== */
+  function carregarUtente(){
+    const key = utenteSelect.value;
+    const txt = utentes[key] || '';
+    const linhas = txt.split('\n').map(s=>s.trim()).filter(Boolean);
+    window.identificacao = linhas[0] || '';
+    listaMedicamentos.innerHTML = '';
+    // NOTE: removed obsEl.value = '' so observations are preserved (optional)
+    for(let i=1;i<linhas.length;i++){
+      const medLine = linhas[i];
+      const {name,dose} = parseMedLine(medLine);
+      const div = document.createElement('div'); div.className = 'med-item';
+      const label = document.createElement('label'); label.style.display='flex'; label.style.alignItems='center'; label.style.gap='10px';
+      const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=true; cb.dataset.name = name; cb.dataset.dose = dose;
+      cb.addEventListener('change', updatePreview);
+      const span = document.createElement('span'); span.textContent = formatDisplay(name,dose);
+      label.appendChild(cb); label.appendChild(span); div.appendChild(label); listaMedicamentos.appendChild(div);
+    }
     updatePreview();
-});
+  }
 
-deselectAllBtn.addEventListener('click', () => {
-    listaMedicamentos.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.checked = false;
+  function popularSelect(){
+    utenteSelect.innerHTML = '';
+    const keys = Object.keys(utentes).sort();
+    keys.forEach(key => {
+      const option = document.createElement('option'); option.value = key; option.textContent = key; utenteSelect.appendChild(option);
     });
-    updatePreview();
-});
+    if(keys.length>0) utenteSelect.value = keys[0];
+    utenteSelect.addEventListener('change', carregarUtente);
+    carregarUtente();
+  }
 
-obsEl.addEventListener('input', updatePreview);
+  /* ============== EVENTS ============== */
+  selectAllBtn.addEventListener('click', ()=>{ listaMedicamentos.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=true); updatePreview(); });
+  deselectAllBtn.addEventListener('click', ()=>{ listaMedicamentos.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false); updatePreview(); });
+  obsEl.addEventListener('input', updatePreview);
 
+  // Mailto with fallback
+  function openMailFallback(subject, body){
+    const mailto = `mailto:usf.gaya@ulsge.min-saude.pt?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    try{
+      const a = document.createElement('a'); a.href = mailto; a.style.display='none'; document.body.appendChild(a); a.click(); a.remove(); return;
+    }catch(e){ console.warn('anchor fail', e); }
+    try{ const w = window.open(mailto, '_blank'); if(w) return; }catch(e){ console.warn('open fail', e); }
+    // fallback: copy body to clipboard and show message
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(body).then(()=> alert('Não foi possível abrir automaticamente o cliente de e-mail. Texto copiado para a área de transferência. Abra o Mail e cole.')).catch(()=> { alert('Não foi possível abrir o cliente de e-mail e copiar automaticamente. Copie manualmente o texto.'); });
+    } else {
+      alert('Não foi possível abrir automaticamente o cliente de e-mail. Copie manualmente o texto mostrado no preview.');
+    }
+  }
 
-// Prepare Email (Mailto)
-btnPreparar.addEventListener('click', () => {
+  btnPreparar.addEventListener('click', ()=> {
     const subject = subjectElement.textContent.trim();
     const body = emailPreview.textContent.trim();
+    openMailFallback(subject, body);
+  });
 
-    const mailtoLink = `mailto:usf.gaya@ulsge.min-saude.pt?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoLink;
-});
-
-
-// Copy All
-copyAllBtn.addEventListener('click', async () => {
+  copyAllBtn.addEventListener('click', async ()=>{
     const textToCopy = emailPreview.textContent.trim();
-    try {
-        await navigator.clipboard.writeText(textToCopy);
-        copyAllBtn.textContent = 'Copiado!';
-    } catch (err) {
-        console.error('Falha ao copiar:', err);
-        copyAllBtn.textContent = 'Erro ao copiar!';
-    }
-    setTimeout(() => {
-        copyAllBtn.textContent = 'Copiar tudo';
-    }, 2000);
-});
+    try{ await navigator.clipboard.writeText(textToCopy); copyAllBtn.textContent='Copiado!'; }
+    catch(e){ console.warn('copy fail', e); copyAllBtn.textContent='Erro ao copiar!'; }
+    setTimeout(()=> copyAllBtn.textContent='Copiar tudo', 2000);
+  });
 
-// Editor Logic
-function showEditor() {
+  // Editor show/hide: hide ALL control rows explicitly
+  function setControlsHidden(hidden){
+    document.querySelectorAll('.controls').forEach(el => el.style.display = hidden ? 'none' : '');
+    document.getElementById('listaMedicamentos').style.display = hidden ? 'none' : '';
+    document.getElementById('obs').parentElement.style.display = hidden ? 'none' : '';
+    document.getElementById('emailPreview').style.display = hidden ? 'none' : '';
+    copyAllBtn.parentElement.style.display = hidden ? 'none' : '';
+  }
+
+  function showEditor(){
     const key = utenteSelect.value;
     editorArea.value = utentes[key] || '';
     editorPanel.classList.remove('hidden');
-    
-    document.getElementById('listaMedicamentos').classList.add('hidden');
-    document.getElementById('obs').parentElement.classList.add('hidden');
-    document.querySelector('.controls').classList.add('hidden');
-    btnPreparar.parentElement.classList.add('hidden');
-    emailPreview.parentElement.classList.add('hidden');
-    copyAllBtn.parentElement.classList.add('hidden');
-}
-
-function hideEditor() {
+    setControlsHidden(true);
+    editorPanel.setAttribute('aria-hidden','false');
+  }
+  function hideEditor(){
     editorPanel.classList.add('hidden');
-    
-    document.getElementById('listaMedicamentos').classList.remove('hidden');
-    document.getElementById('obs').parentElement.classList.remove('hidden');
-    document.querySelector('.controls').classList.remove('hidden');
-    btnPreparar.parentElement.classList.remove('hidden');
-    emailPreview.parentElement.classList.remove('hidden');
-    copyAllBtn.parentElement.classList.remove('hidden');
-}
+    setControlsHidden(false);
+    editorPanel.setAttribute('aria-hidden','true');
+  }
 
-btnEditar.addEventListener('click', showEditor);
+  btnEditar.addEventListener('click', showEditor);
+  cancelEditor.addEventListener('click', ()=>{ hideEditor(); carregarUtente(); });
 
-cancelEditor.addEventListener('click', () => {
-    hideEditor();
-    carregarUtente(); 
-});
-
-saveEditor.addEventListener('click', () => {
+  saveEditor.addEventListener('click', ()=>{
     const key = utenteSelect.value;
     const normalizedText = normalizeUtenteText(editorArea.value);
-
-    // Save
     utentes[key] = normalizedText;
     saveUtentes(utentes);
-
-    // Update UI
+    // preserve current utente selection and redraw
+    const current = utenteSelect.value;
+    while (utenteSelect.firstChild) utenteSelect.removeChild(utenteSelect.firstChild);
+    Object.keys(utentes).sort().forEach(k => { const o=document.createElement('option'); o.value=k; o.textContent=k; utenteSelect.appendChild(o); });
+    utenteSelect.value = current;
     hideEditor();
-    popularSelect();
+    carregarUtente();
+  });
+
+  // NOTE: popularSelect() is invoked after successful login
 });
-
-
-/* ===== Initialization ===== */
-// popularSelect() só é chamado após o login
-// Se o login for feito, a popularSelect() inicia o resto
-// Se a página for aberta sem login, ela espera
-// O ThemeToggle carrega e corre no início, fora do DOMContentLoaded,
-// mas foi movido para dentro do DOMContentLoaded para estabilidade.
-}); 
 </script>
 </body>
 </html>
