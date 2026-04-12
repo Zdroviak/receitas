@@ -301,19 +301,23 @@ EyeCare | `
 
   // Editor show/hide: hide ALL control rows explicitly
   function setControlsHidden(hidden){
-    document.querySelectorAll('.controls').forEach(el => el.style.display = hidden ? 'none' : '');
+    document.querySelectorAll('.controls').forEach(el => {
+      if (editorPanel.contains(el)) return;
+      el.style.display = hidden ? 'none' : '';
+    });
     document.getElementById('listaMedicamentos').style.display = hidden ? 'none' : '';
     document.getElementById('obs').parentElement.style.display = hidden ? 'none' : '';
-    document.getElementById('emailPreview').style.display = hidden ? 'none' : '';
+    document.getElementById('emailPreview').parentElement.style.display = hidden ? 'none' : '';
     copyAllBtn.parentElement.style.display = hidden ? 'none' : '';
   }
 
   function showEditor(){
     const key = utenteSelect.value;
     editorArea.value = utentes[key] || '';
-    editorPanel.classList.remove('hidden');
     setControlsHidden(true);
+    editorPanel.classList.remove('hidden');
     editorPanel.setAttribute('aria-hidden','false');
+    editorArea.focus();
   }
   function hideEditor(){
     editorPanel.classList.add('hidden');
@@ -327,6 +331,11 @@ EyeCare | `
   saveEditor.addEventListener('click', ()=>{
     const key = utenteSelect.value;
     const normalizedText = normalizeUtenteText(editorArea.value);
+    if(!normalizedText){
+      alert('O conteúdo do utente não pode ficar vazio.');
+      editorArea.focus();
+      return;
+    }
     utentes[key] = normalizedText;
     saveUtentes(utentes);
     // preserve current utente selection and redraw
